@@ -1,56 +1,24 @@
-import { Model, DataTypes, Optional } from 'sequelize';
-import { sequelize } from '../config/database';
-import User from './User';
 
-// Define attributes
-interface PasswordResetTokenAttributes {
-  id: number;
-  user_id: number; 
-  token: string;
-  expires_at: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { User } from './User';
+
+@Entity({ name: 'password_reset_tokens' })
+export class PasswordResetToken {
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @ManyToOne(() => User, (user) => user.passwordResetTokens, { onDelete: 'CASCADE' })
+  user!: User;
+
+  @Column()
+  token!: string;
+
+  @Column({ name: 'expires_at' })
+  expiresAt!: Date;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
 }
-
-interface PasswordResetTokenCreationAttributes extends Optional<PasswordResetTokenAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
-
-export interface PasswordResetTokenInstance extends Model<PasswordResetTokenAttributes, PasswordResetTokenCreationAttributes> {
-  dataValues: PasswordResetTokenAttributes;
-}
-
-const PasswordResetToken = sequelize.define<PasswordResetTokenInstance>(
-  'PasswordResetToken',
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Users',
-        key: 'id',
-      },
-    },
-    token: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    expires_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-  },
-  {
-    tableName: 'password_reset_tokens',
-    timestamps: true,
-  }
-);
-
-// Define associations
-PasswordResetToken.belongsTo(User, { foreignKey: 'user_id' });
-User.hasMany(PasswordResetToken, { foreignKey: 'user_id' });
-
-export default PasswordResetToken;

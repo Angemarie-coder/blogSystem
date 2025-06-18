@@ -1,10 +1,7 @@
-import { Model, ModelCtor, FindOptions } from 'sequelize';
-import { PaginationOptions, PaginationResult } from '../types';
-
-export async function paginate<T extends Model>(
-  model: ModelCtor<T>,
-  options: PaginationOptions & FindOptions
-): Promise<PaginationResult<T>> {
+export async function paginate<T>(
+  model: any,
+  options: any
+): Promise<any> {
   const { page = 1, limit = 10, ...findOptions } = options;
   
   // Calculate offset

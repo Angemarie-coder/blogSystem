@@ -1,11 +1,20 @@
 import { z } from 'zod';
 import { titleSchema, bodySchema } from './common.schemas';
 
+// Schema for media object
+const mediaSchema = z.object({
+  type: z.enum(['image', 'video', 'document']),
+  url: z.string().url('Invalid URL')
+}).nullable();
+
 // Schema for creating a new post
 export const createPostSchema = z.object({
   body: z.object({
     title: titleSchema,
-    body: bodySchema
+    body: bodySchema,
+    category: z.enum(['Tech', 'Development','Trends']),
+    status: z.enum(['draft', 'posted']),
+    media: mediaSchema
   })
 });
 
@@ -31,9 +40,12 @@ export const updatePostSchema = z.object({
   }),
   body: z.object({
     title: titleSchema.optional(),
-    body: bodySchema.optional()
-  }).refine(data => data.title || data.body, {
-    message: 'At least one of title or body must be provided',
+    body: bodySchema.optional(),
+    category: z.enum(['Tech', 'Development']).optional(),
+    status: z.enum(['draft', 'posted']).optional(),
+    media: mediaSchema.optional()
+  }).refine(data => data.title || data.body || data.category || data.status || data.media, {
+    message: 'At least one field must be provided',
     path: ['body']
   })
 });

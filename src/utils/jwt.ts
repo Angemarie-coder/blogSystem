@@ -22,7 +22,14 @@ export function generateJWT(user: User): string {
   }
 
 export const generateResetToken = (email: string): string => {
-  return jwt.sign({ email }, JWT_SECRET!, { expiresIn: '15m' });
+  return jwt.sign(
+    { 
+      email,
+      type: 'password_reset'
+    }, 
+    JWT_SECRET!, 
+    { expiresIn: '1h' }
+  );
 };
 
 export function generateVerifyToken(payload: VerifyPayload): string {
@@ -30,7 +37,11 @@ export function generateVerifyToken(payload: VerifyPayload): string {
     throw new Error('Missing JWT_SECRET in environment');
   }
   return jwt.sign(
-    { userId: payload.userId, email: payload.email },
+    { 
+      userId: payload.userId, 
+      email: payload.email,
+      type: 'email_verification'
+    },
     process.env.JWT_SECRET,
     { expiresIn: '24h' }
   );

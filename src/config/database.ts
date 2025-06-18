@@ -2,6 +2,7 @@ import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
 import { User } from '../models/User';
 import { Post } from '../models/Post';
+import { PasswordResetToken } from '../models/PasswordResetToken';
 
 dotenv.config();
 
@@ -13,7 +14,7 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD || 'ange1',
   database: process.env.DB_NAME || 'blogpost_db',
   synchronize: process.env.NODE_ENV !== '', 
-  entities: [User, Post],
+  entities: [User, Post, PasswordResetToken],
   migrations: ['src/migrations/**/*.ts'],
   subscribers: ['src/subscribers/**/*.ts'],
 });

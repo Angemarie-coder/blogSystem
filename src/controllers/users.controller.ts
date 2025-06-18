@@ -2,15 +2,20 @@ import { Response, NextFunction } from 'express';
 import { UserService } from '../services/users.service';
 import { asyncHandler } from '../middleware/errorHandler';
 import { 
-  UpdateUserInput, 
+  UpdateUserInput,
   GetUserByIdInput, 
   SearchUsersInput, 
   DeleteUserInput 
 } from '../schema/user.schemas';
 import { AuthenticatedRequest, ApiResponse } from '../types/common.types';
 import { NotFoundError, ConflictError } from '../utils/errors';
+import { getRepository } from 'typeorm';
+import { User } from '../models/User';
+import { Request } from 'express';
+import { AppDataSource } from '../config/database';
 
 const userService = new UserService();
+const userRepo = AppDataSource.getRepository(User);
 
 export const getAllUsers = asyncHandler(async (
   req: AuthenticatedRequest, 
@@ -114,3 +119,25 @@ export const deleteUser = asyncHandler(async (
     message: 'User deleted successfully'
   });
 });
+
+// Get current user profile
+export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.user) return res.status(401).json({ success: false, message: 'User not authenticated' });
+  const userId = req.user.id;
+  const user = await userRepo.findOne({ where: { id: userId } });
+  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+  res.json({ success: true, data: { id: user.id, name: user.name, email: user.email, role: user.role, profileImage: user.profileImage } });
+};
+
+// Update current user profile (name, profileImage)
+export const updateProfile = async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.user) return res.status(401).json({ success: false, message: 'User not authenticated' });
+  const userId = req.user.id;
+  const { name, profileImage } = req.body;
+  const user = await userRepo.findOne({ where: { id: userId } });
+  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+  if (name) user.name = name;
+  if (profileImage) user.profileImage = profileImage;
+  await userRepo.save(user);
+  res.json({ success: true, message: 'Profile updated', data: { name: user.name, profileImage: user.profileImage } });
+};

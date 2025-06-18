@@ -21,7 +21,7 @@ export class UserService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return await this.userRepository.findOneBy({ email });
+    return await this.userRepository.findOneBy({ email: email.toLowerCase() });
   }
 
   async update(id: number, updatedData: Partial<User>): Promise<User | null> {
@@ -31,6 +31,11 @@ export class UserService {
     // If password is being updated, hash it
     if (updatedData.password) {
       updatedData.password = await bcrypt.hash(updatedData.password, 10);
+    }
+    
+    // If email is being updated, store as lowercase
+    if (updatedData.email) {
+      updatedData.email = updatedData.email.toLowerCase();
     }
     
     Object.assign(user, updatedData);

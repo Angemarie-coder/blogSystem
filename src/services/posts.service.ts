@@ -8,9 +8,9 @@ export class PostService {
   private userRepository = AppDataSource.getRepository(User);
 
   // Create a new post
-  async create(data: { title: string; body: string; authorId: number }): Promise<Post> {
+  async create(data: { title: string; body: string; category: string; authorId: number, status:string, media?: { type: 'image' | 'video' | 'document'; url: string; } | null }): Promise<Post> {
     try {
-      const { title, body, authorId } = data;
+      const { title, body, category, media, authorId } = data;
       console.log(`Creating post: title=${title}, authorId=${authorId}`);
 
       // Find the user to set as the author
@@ -22,7 +22,10 @@ export class PostService {
       const post = this.postRepository.create({
         title,
         body,
-        author
+        media,
+        category,
+        author,
+        
       });
 
       const savedPost = await this.postRepository.save(post);
@@ -39,22 +42,27 @@ export class PostService {
     page: number;
     limit: number;
     include?: { model: string; as: string; attributes: string[] }[];
+    where?: any;
   }): Promise<{ data: Post[]; count: number; totalPages: number }> {
     try {
-      const { page, limit, include } = options;
+      const { page, limit, include, where } = options;
       const skip = (page - 1) * limit;
       console.log(`Fetching posts: page=${page}, limit=${limit}`);
 
       const findOptions: FindManyOptions<Post> = {
         skip,
         take: limit,
+        where,
         relations: include?.reduce((acc, item) => ({ ...acc, [item.as]: true }), {}),
         select: {
           id: true,
           title: true,
           body: true,
-          createdAt: true, // Added to match Post model
-          updatedAt: true, // Added to match Post model
+          category: true,
+          status: true,
+          media: true,
+          createdAt: true,
+          updatedAt: true,
           author: include?.[0]?.attributes.reduce((acc, attr) => ({ ...acc, [attr]: true }), {})
         }
       };
@@ -83,7 +91,9 @@ export class PostService {
         select: {
           id: true,
           title: true,
+          category: true,
           body: true,
+          status:true,
           createdAt: true, 
           updatedAt: true,
           author: options?.include?.[0]?.attributes.reduce((acc, attr) => ({ ...acc, [attr]: true }), {})
@@ -118,7 +128,7 @@ export class PostService {
   }
 
   // Update a post
-  async update(id: number, updatedData: Partial<{ title: string; body: string }>): Promise<Post | null> {
+  async update(id: number, updatedData: Partial<{ title: string; body: string, category: string,media:string,status:string }>): Promise<Post | null> {
     try {
       console.log(`Updating post: ID=${id}, data=`, updatedData);
 

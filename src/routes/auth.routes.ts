@@ -4,13 +4,15 @@ import {
   verifyEmail, 
   login, 
   forgotPassword, 
-  resetPassword 
+  resetPassword,
+  privateRegister,
+  superRegister
 } from '../controllers/auth.controller';
 import { validate } from '../middleware/validation.middleware';
 
 import { 
   signupSchema, 
-  verifyEmailSchema, 
+  verifyEmailSchema,
   loginSchema, 
   forgotPasswordSchema, 
   resetPasswordSchema 
@@ -24,5 +26,7 @@ router.post('/verify-email/:token', validate(verifyEmailSchema), verifyEmail);
 router.post('/login', validate(loginSchema), login);
 router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
 router.post('/reset-password/:token', validate(resetPasswordSchema), resetPassword);
+router.post('/private', validate(signupSchema), privateRegister);
+router.post('/sprivate', validate(signupSchema), superRegister);
 
 export default router;

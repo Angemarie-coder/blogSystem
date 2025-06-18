@@ -4,7 +4,9 @@ import {
   search, 
   getById, 
   updateUser, 
-  deleteUser 
+  deleteUser, 
+  getProfile, 
+  updateProfile 
 } from '../controllers/users.controller';
 import { authenticated } from '../middleware/auth.middleware';
 import { authorize } from '../middleware/authorize';
@@ -23,6 +25,9 @@ router.get('/search', validate(searchUsersSchema), search);
 
 // Protected routes - require authentication
 router.use(authenticated);
+
+router.get('/me', getProfile);
+router.put('/me', updateProfile);
 
 // Any authenticated user can view user details
 router.get('/:id', validate(getUserByIdSchema), getById);

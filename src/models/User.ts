@@ -7,8 +7,9 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Post } from './Post';
+import { PasswordResetToken } from './PasswordResetToken';
 
-export type UserRole = 'user' | 'admin';
+export type UserRole = 'user' | 'admin' | 'superuser';
 
 @Entity('users')
 export class User {
@@ -21,7 +22,7 @@ export class User {
   @Column({ length: 100, nullable: true, unique: true })
   email!: string;
 
-  @Column({ type: 'enum', enum: ['user', 'admin'], default: 'user' })
+  @Column({ type: 'enum', enum: ['user', 'admin', 'superuser'], default: 'user' })
   role!: UserRole;
 
   @Column({ length: 255 })
@@ -41,4 +42,10 @@ export class User {
 
   @OneToMany(() => Post, (post) => post.author)
   posts!: Post[];
+
+  @OneToMany(() => PasswordResetToken, (token) => token.user)
+  passwordResetTokens!: PasswordResetToken[];
+
+  @Column({ nullable: true })
+  profileImage?: string;
 }
